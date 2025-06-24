@@ -8,7 +8,7 @@ class PiVPNManager:
         logger.info(f"PiVPNManager initialized with config_dir: {self.config_dir}")
 
     def add_profile(self, profile_name: str) -> str:
-        cmd = ["pivpn", "-a", "-n", profile_name]
+        cmd = ["sudo","pivpn", "-a", "-n", profile_name]
         logger.info(f"Adding VPN profile '{profile_name}' with command: {' '.join(cmd)}")
         try:
             subprocess.run(cmd, check=True)
@@ -59,7 +59,7 @@ class PiVPNManager:
         return None
 
     def revoke_profile(self, profile_name: str) -> bool:
-        cmd = ["pivpn", "-r", "-n", profile_name]
+        cmd = ["sudo","pivpn", "-r", "-n", profile_name]
         logger.info(f"Revoking VPN profile '{profile_name}' with: {' '.join(cmd)}")
         try:
             subprocess.run(cmd, input="y\n", text=True, check=True)
