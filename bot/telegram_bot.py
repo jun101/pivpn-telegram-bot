@@ -1,5 +1,3 @@
-# bot/telegram_bot.py
-
 import os
 from telegram import (
     Update,
@@ -40,7 +38,8 @@ class TelegramBot:
         )
 
         self.app.add_handler(CommandHandler("start", self.start))
-        self.app.add_handler(CallbackQueryHandler(self.button_handler, pattern="^(list|show_.*|revoke|revoke_.*|back)$"))
+        # Handles list/show/revoke/back buttons
+        self.app.add_handler(CallbackQueryHandler(self.button_handler, pattern="^(list|show_.*|revoke_.*|back)$"))
         self.app.add_handler(conv_handler)
 
         logger.info("TelegramBot initialized")
@@ -58,7 +57,6 @@ class TelegramBot:
         keyboard = [
             [InlineKeyboardButton("Create VPN Profile", callback_data="create")],
             [InlineKeyboardButton("List Profiles", callback_data="list")],
-            [InlineKeyboardButton("Revoke VPN Profile", callback_data="revoke")],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -90,12 +88,15 @@ class TelegramBot:
                 return ConversationHandler.END
 
             keyboard = [
-                [InlineKeyboardButton(name, callback_data=f"show_{name}")] for name in profiles
+                [
+                    InlineKeyboardButton(name, callback_data=f"show_{name}"),
+                    InlineKeyboardButton("Revoke", callback_data=f"revoke_{name}")
+                ] for name in profiles
             ]
             keyboard.append([InlineKeyboardButton("Back to Menu", callback_data="back")])
             reply_markup = InlineKeyboardMarkup(keyboard)
 
-            await query.edit_message_text("Existing VPN Profiles (click to show QR code):", reply_markup=reply_markup)
+            await query.edit_message_text("Existing VPN Profiles:", reply_markup=reply_markup)
             return ConversationHandler.END
 
         elif data.startswith("show_"):
@@ -122,16 +123,6 @@ class TelegramBot:
             )
             return ConversationHandler.END
 
-        elif data == "back":
-            await self.show_main_menu(query)
-            return ConversationHandler.END
-
-        elif data == "revoke":
-            await query.edit_message_text(
-                "To revoke a profile, please use the 'List Profiles' option and choose the profile."
-            )
-            return ConversationHandler.END
-
         elif data.startswith("revoke_"):
             profile_name = data[len("revoke_"):]
             success = self.pivpn.revoke_profile(profile_name)
@@ -139,6 +130,12 @@ class TelegramBot:
                 await query.edit_message_text(f"VPN profile revoked: {profile_name}")
             else:
                 await query.edit_message_text(f"No VPN profile found: {profile_name}")
+
+            # Show updated main menu after revoke
+            await self.show_main_menu(query)
+            return ConversationHandler.END
+
+        elif data == "back":
             await self.show_main_menu(query)
             return ConversationHandler.END
 
