@@ -59,13 +59,14 @@ class PiVPNManager:
         return None
 
     def revoke_profile(self, profile_name: str) -> bool:
-        cmd = f"echo 'y' | pivpn -r -n {profile_name}"
-        logger.info(f"Revoking VPN profile '{profile_name}' with: {cmd}")
+        cmd = ["pivpn", "-r", "-n", profile_name]
+        logger.info(f"Revoking VPN profile '{profile_name}' with: {' '.join(cmd)}")
         try:
-            subprocess.run(cmd, shell=True, check=True, executable="/bin/bash")
+            subprocess.run(cmd, input="y\n", text=True, check=True)
             logger.info(f"Profile '{profile_name}' revoked successfully.")
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to revoke profile '{profile_name}': {e}")
             return False
+
 
