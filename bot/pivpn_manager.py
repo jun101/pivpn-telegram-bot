@@ -59,18 +59,13 @@ class PiVPNManager:
         return None
 
     def revoke_profile(self, profile_name: str) -> bool:
-        cmd = ["pivpn", "-r", "-n", profile_name]
-        logger.info(f"Revoking VPN profile '{profile_name}' with command: {' '.join(cmd)}")
+        cmd = f"echo 'y' | pivpn -r -n {profile_name}"
+        logger.info(f"Revoking VPN profile '{profile_name}' with: {cmd}")
         try:
-            subprocess.run(cmd, check=True)
-            conf_path = os.path.join(self.config_dir, f"{profile_name}.conf")
-            if os.path.isfile(conf_path):
-                os.remove(conf_path)
-                logger.info(f"Deleted config file for profile '{profile_name}'")
+            subprocess.run(cmd, shell=True, check=True, executable="/bin/bash")
             logger.info(f"Profile '{profile_name}' revoked successfully.")
             return True
         except subprocess.CalledProcessError as e:
             logger.error(f"Failed to revoke profile '{profile_name}': {e}")
-        except Exception as e:
-            logger.error(f"Error revoking profile '{profile_name}': {e}")
-        return False
+            return False
+
