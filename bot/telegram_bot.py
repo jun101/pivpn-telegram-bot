@@ -90,7 +90,7 @@ class TelegramBot:
             keyboard = [
                 [
                     InlineKeyboardButton(name, callback_data=f"show_{name}"),
-                    InlineKeyboardButton("Revoke", callback_data=f"revoke_{name}")
+                    InlineKeyboardButton("🗑️", callback_data=f"revoke_{name}")
                 ] for name in profiles
             ]
             keyboard.append([InlineKeyboardButton("Back to Menu", callback_data="back")])
