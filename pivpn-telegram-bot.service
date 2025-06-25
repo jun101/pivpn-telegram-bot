@@ -1,0 +1,13 @@
+[Unit]
+Description=PiVPN Telegram Bot Service
+After=network.target
+
+[Service]
+User=user
+WorkingDirectory=/home/user/pivpn-telegram-bot
+ExecStart=/home/user/pivpn-telegram-bot/venv/bin/python3 -m bot.main
+Restart=always
+Environment=PIVPN_CONFIG_DIR=/etc/wireguard
+
+[Install]
+WantedBy=multi-user.target
